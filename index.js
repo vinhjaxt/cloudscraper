@@ -1,9 +1,7 @@
 var vm = require('vm');
 var requestModule = require('request');
-var jar = requestModule.jar();
 
-var request      = requestModule.defaults({jar: jar}), // Cookies should be enabled
-    UserAgent    = 'Ubuntu Chromium/34.0.1847.116 Chrome/34.0.1847.116 Safari/537.36',
+var UserAgent    = 'Ubuntu Chromium/34.0.1847.116 Chrome/34.0.1847.116 Safari/537.36',
     Timeout      = 6000, // Cloudflare requires a delay of 5 seconds, so wait for at least 6.
     cloudscraper = {};
 
@@ -13,6 +11,9 @@ var request      = requestModule.defaults({jar: jar}), // Cookies should be enab
  * @param  {Function}  callback    function(error, response, body) {}
  * @param  {Object}    headers     Hash with headers, e.g. {'Referer': 'http://google.com', 'User-Agent': '...'}
  */
+cloudscraper.getJar = requestModule.jar();
+cloudscraper.realRequest = requestModule.defaults({jar: cloudscraper.getJar}); // Cookies should be enabled
+
 cloudscraper.get = function(url, callback, headers) {
   performRequest({
     method: 'GET',
@@ -218,7 +219,7 @@ function setCookieAndReload(response, body, options, callback) {
   };
   vm.runInNewContext(cookieSettingCode, sandbox);
   try {
-    jar.setCookie(sandbox.document.cookie, response.request.uri.href, {ignoreError: true});
+    cloudscraper.getJar.setCookie(sandbox.document.cookie, response.request.uri.href, {ignoreError: true});
   } catch (err) {
     return callback({errorType: 3, error: 'Error occurred during evaluation: ' +  err.message}, body, response);
   }
@@ -236,7 +237,7 @@ function requestMethod(method) {
   // For now only GET and POST are supported
   method = method.toUpperCase();
 
-  return method === 'POST' ? request.post : request.get;
+  return method === 'POST' ? cloudscraper.realRequest.post : cloudscraper.realRequest.get;
 }
 
 function giveResults(options, error, response, body, callback) {
