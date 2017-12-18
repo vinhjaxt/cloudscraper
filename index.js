@@ -1,7 +1,17 @@
-var vm = require('vm');
+const {VM} = require('vm2');
+const vm = new VM({
+    timeout: 5000,
+    sandbox: {
+      location: {
+        reload: function() {}
+      },
+      document: {}
+    }
+});
+
 var requestModule = require('request');
 
-var UserAgent    = 'Ubuntu Chromium/34.0.1847.116 Chrome/34.0.1847.116 Safari/537.36',
+var UserAgent    = 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36',
     Timeout      = 6000, // Cloudflare requires a delay of 5 seconds, so wait for at least 6.
     cloudscraper = {};
 
@@ -13,6 +23,28 @@ var UserAgent    = 'Ubuntu Chromium/34.0.1847.116 Chrome/34.0.1847.116 Safari/53
  */
 cloudscraper.getJar = requestModule.jar();
 cloudscraper.realRequest = requestModule.defaults({jar: cloudscraper.getJar}); // Cookies should be enabled
+
+cloudscraper.setCookies = function (cookies, url) {
+  try{
+    cookies.split(/\s*;\s*/g).forEach(function (cookie){
+      if(cookie){
+        try{
+          cloudscraper.getJar.setCookie(cookie, url, {ignoreError: true});
+        }catch(e){
+          // ignore
+        }
+      }
+    });
+  }catch(e){
+    console.error(e);
+  }
+};
+cloudscraper.setCookie = cloudscraper.setCookies;
+
+cloudscraper.getCookies = function (url) {
+  return cloudscraper.getJar.getCookieString(url);
+};
+cloudscraper.getCookie = cloudscraper.getCookies;
 
 cloudscraper.get = function(url, callback, headers) {
   performRequest({
@@ -211,13 +243,11 @@ function setCookieAndReload(response, body, options, callback) {
   var base64EncodedCode = challenge[1];
   var cookieSettingCode = new Buffer(base64EncodedCode, 'base64').toString('ascii');
 
-  var sandbox = {
-    location: {
-      reload: function() {}
-    },
-    document: {}
-  };
-  vm.runInNewContext(cookieSettingCode, sandbox);
+  try{
+    vm.run(cookieSettingCode);
+  } catch (err) {
+    return callback({errorType: 3, error: 'Failed to execute script: ' +  err.message}, body, response);
+  }
   try {
     cloudscraper.getJar.setCookie(sandbox.document.cookie, response.request.uri.href, {ignoreError: true});
   } catch (err) {

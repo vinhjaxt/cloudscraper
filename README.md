@@ -1,5 +1,9 @@
 cloudscraper
 ============
+[*vinhjaxt*]
+* Remove some files
+* Use `vm2`
+* Support get and set cookie by url
 
 Node.js library to bypass cloudflare's anti-ddos page.
 

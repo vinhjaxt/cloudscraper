@@ -1,14 +1,14 @@
 {
   "name": "cloudscraper",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "description": "Bypasses cloudflare's anti-ddos page",
   "main": "index.js",
   "scripts": {
-    "test": "grunt"
+    "test": "echo 'who needs it?'"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/codemanki/cloudscraper.git"
+    "url": "https://github.com/vinhjaxt/cloudscraper.git"
   },
   "publishConfig": {
     "registry": "http://registry.npmjs.org"
@@ -19,17 +19,11 @@
     "scrape",
     "webscraper"
   ],
-  "author": "Oleksii Sribnyi",
+  "author": "Oleksii Sribnyi, improved by Vinhjaxt",
   "license": "MIT",
-  "homepage": "https://github.com/codemanki/cloudscraper",
+  "homepage": "https://github.com/vinhjaxt/cloudscraper",
   "dependencies": {
-    "request": "^2.49.0"
-  },
-  "devDependencies": {
-    "chai": "^1.10.0",
-    "grunt": "^0.4.5",
-    "grunt-mocha-test": "^0.12.4",
-    "mocha": "^2.0.1",
-    "sinon": "^1.12.1"
+    "request": "^2.49.0",
+    "vm2": "^3.5.2"
   }
 }
